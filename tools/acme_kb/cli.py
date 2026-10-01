@@ -1,0 +1,202 @@
+import argparse
+import datetime as dt
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+from . import records
+
+DEFAULT_URL = "https://github.com/devops01ua/agent-knowledge-sample.git"
+
+
+def home():
+    return Path(os.environ.get("ACME_HOME") or Path.home())
+
+
+def checkout_dir():
+    return Path(os.environ.get("ACME_KNOWLEDGE_HOME") or home() / ".acme-knowledge")
+
+
+def is_repo(path):
+    path = Path(path)
+    return (path / "AGENTS.md").is_file() and (path / "memory").is_dir()
+
+
+def find_root(arg):
+    for candidate in (arg, os.environ.get("ACME_KNOWLEDGE_HOME"), Path.cwd(), checkout_dir()):
+        if candidate and is_repo(candidate):
+            return Path(candidate).resolve()
+    sys.exit("not inside a knowledge repo: run `acme-kb setup` first, or pass --repo PATH")
+
+
+def git(root, *args, check=True):
+    return subprocess.run(["git", "-C", str(root), *args], check=check, capture_output=True, text=True)
+
+
+def cmd_setup(args):
+    dest = checkout_dir()
+    if (dest / ".git").is_dir():
+        subprocess.run(["git", "-C", str(dest), "pull", "--ff-only"], check=True)
+    else:
+        subprocess.run(["git", "clone", args.url, str(dest)], check=True)
+    print(f"knowledge checkout: {dest}")
+    link_skills(dest, args.link_skills or [home() / ".claude" / "skills", home() / ".agents" / "skills"])
+
+
+def link_skills(dest, targets):
+    for target in targets:
+        target = Path(target)
+        target.mkdir(parents=True, exist_ok=True)
+        for skill in sorted((dest / ".agents" / "skills").iterdir()):
+            link = target / skill.name
+            if link.is_symlink():
+                link.unlink()
+            elif link.exists():
+                print(f"  kept existing {link}")
+                continue
+            link.symlink_to(skill, target_is_directory=True)
+            print(f"  skill {link}")
+
+
+def cmd_sync(args):
+    root = find_root(args.repo)
+    out = git(root, "pull", "--ff-only", check=False)
+    print((out.stdout or out.stderr).strip() or "up to date")
+    return out.returncode
+
+
+def cmd_search(args):
+    root = find_root(args.repo)
+    words = [w.lower() for w in args.words]
+    hits = 0
+    for rec in records.load(root):
+        if args.type and rec.kind != args.type:
+            continue
+        if args.status and rec.meta.get("status") != args.status:
+            continue
+        if args.in_repo and args.in_repo not in rec.meta.get("repos", []):
+            continue
+        text = rec.text.lower()
+        if all(word in text for word in words):
+            hits += 1
+            label = rec.meta.get("id") or str(rec.path.relative_to(root).with_suffix(""))
+            status = rec.meta.get("status", rec.kind)
+            print(f"{label}  [{status}]  {rec.meta.get('summary', '')}")
+            print(f"    {rec.path.relative_to(root)}")
+    if not hits:
+        print("no records match; the search is exact words, try a shorter or different word")
+    return 0
+
+
+def next_id(root, kind, today):
+    spec = records.KINDS[kind]
+    stem = f"{spec['prefix']}-{today.isoformat()}-"
+    used = [int(p.stem[-3:]) for p in (root / spec["dir"]).glob(stem + "*.md")]
+    return f"{stem}{max(used, default=0) + 1:03d}"
+
+
+def cmd_new(args):
+    root = find_root(args.repo)
+    today = dt.date.today()
+    rid = next_id(root, args.kind, today)
+    text = (root / "templates" / f"{args.kind}.md").read_text()
+    text = (text.replace("{{id}}", rid).replace("{{summary}}", args.summary.replace('"', "'"))
+            .replace("{{today}}", today.isoformat())
+            .replace("{{expires}}", (today + dt.timedelta(days=180)).isoformat())
+            .replace("{{author}}", os.environ.get("USER", "unknown")))
+    path = root / records.KINDS[args.kind]["dir"] / f"{rid}.md"
+    path.write_text(text)
+    print(path.relative_to(root))
+
+
+def cmd_validate(args):
+    root = find_root(args.repo)
+    errors, warnings = records.check(root)
+    for line in warnings:
+        print("warning:", line)
+    for line in errors:
+        print("error:", line)
+    print(f"{len(errors)} error(s), {len(warnings)} warning(s)")
+    return 1 if errors else 0
+
+
+def cmd_capture(args):
+    root = find_root(args.repo)
+    matches = [r for r in records.load(root) if r.meta.get("id") == args.id]
+    if not matches:
+        sys.exit(f"no record with id {args.id}")
+    errors, _ = records.check(root)
+    rel = str(matches[0].path.relative_to(root))
+    mine = [e for e in errors if e.startswith(rel + ":")]
+    if mine:
+        print("\n".join(mine))
+        sys.exit("fix the record first")
+    branch = f"capture/{args.id}"
+    git(root, "switch", "-c", branch)
+    git(root, "add", rel)
+    git(root, "commit", "-m", f"capture {args.id}: {matches[0].meta.get('summary', '')[:60]}")
+    print(f"committed on {branch}")
+    print(f"next: git -C {root} push -u origin {branch}   and open a pull request")
+
+
+def cmd_gen_index(args):
+    root = find_root(args.repo)
+    lines = ["# Index", "", "Generated by `acme-kb gen-index`. Not tracked in git.", ""]
+    for rec in records.load(root):
+        rel = rec.path.relative_to(root)
+        label = rec.meta.get("id") or rel.stem
+        lines.append(f"- [{label}]({rel}) [{rec.meta.get('status', rec.kind)}] {rec.meta.get('summary', '')}")
+    (root / "index.md").write_text("\n".join(lines) + "\n")
+    print(f"index.md: {len(lines) - 4} entries")
+
+
+def cmd_init_repo(args):
+    target = Path(args.path).resolve() / "AGENTS.md"
+    if target.exists():
+        print(f"{target} already exists, left as is")
+        return 0
+    template = find_root(args.repo) / "templates" / "compass.md"
+    shutil.copy(template, target)
+    print(f"wrote {target}: fill in what the repo is for, its commands, traps and dependencies")
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog="acme-kb", description=__doc__)
+    parser.add_argument("--repo", help="path to a knowledge repo")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("setup", help="clone the knowledge repo and link its skills")
+    p.add_argument("--url", default=DEFAULT_URL)
+    p.add_argument("--link-skills", action="append", help="skills directory to link into (repeatable)")
+    p.set_defaults(func=cmd_setup)
+
+    sub.add_parser("sync", help="pull the fresh knowledge").set_defaults(func=cmd_sync)
+
+    p = sub.add_parser("search", help="exact-word search over every record")
+    p.add_argument("words", nargs="+")
+    p.add_argument("--type", choices=sorted(records.KINDS))
+    p.add_argument("--status")
+    p.add_argument("--in-repo", help="only records about this repository")
+    p.set_defaults(func=cmd_search)
+
+    p = sub.add_parser("new", help="create a record from its template")
+    p.add_argument("kind", choices=["finding", "decision", "incident"])
+    p.add_argument("summary")
+    p.set_defaults(func=cmd_new)
+
+    sub.add_parser("validate", help="check every record against the schema").set_defaults(func=cmd_validate)
+
+    p = sub.add_parser("capture", help="validate one record and commit it on its own branch")
+    p.add_argument("id")
+    p.set_defaults(func=cmd_capture)
+
+    sub.add_parser("gen-index", help="write a local index.md").set_defaults(func=cmd_gen_index)
+
+    p = sub.add_parser("init-repo", help="add an AGENTS.md compass to a code repository")
+    p.add_argument("path")
+    p.set_defaults(func=cmd_init_repo)
+
+    args = parser.parse_args(argv)
+    return args.func(args) or 0

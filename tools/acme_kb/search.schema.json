@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "acme-kb/search-result/1",
+  "title": "acme-kb search --json",
+  "description": "Output of `acme-kb search --json`. A field can be added without a version bump; removing or renaming one, or changing what it means, bumps schema_version.",
+  "type": "object",
+  "required": ["schema_version", "query", "total", "results"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "query": {
+      "type": "object",
+      "required": ["terms", "type", "status", "in_repo", "limit"],
+      "additionalProperties": false,
+      "properties": {
+        "terms": {"type": "array", "items": {"type": "string"}},
+        "type": {"type": ["string", "null"]},
+        "status": {"type": ["string", "null"]},
+        "in_repo": {"type": ["string", "null"]},
+        "limit": {"type": "integer", "description": "Most results returned; 0 means all."}
+      }
+    },
+    "total": {
+      "type": "object",
+      "description": "Matches before the limit.",
+      "required": ["full", "partial"],
+      "additionalProperties": false,
+      "properties": {
+        "full": {"type": "integer", "description": "Records holding every term (or passing the filters when there are no terms)."},
+        "partial": {"type": "integer", "description": "Records holding only some of the terms."}
+      }
+    },
+    "results": {
+      "type": "array",
+      "description": "Best first: every full match before any partial one.",
+      "items": {
+        "type": "object",
+        "required": ["path", "kind", "match", "id", "status", "confidence", "summary", "systems", "repos",
+                     "aliases", "updated", "expires"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {"type": "string", "description": "Path from the repo root."},
+          "kind": {"enum": ["wiki", "finding", "decision", "incident"]},
+          "match": {"enum": ["full", "partial"]},
+          "id": {"type": ["string", "null"], "description": "Record id; null for a wiki page."},
+          "status": {"enum": ["open", "fixed", "accepted-risk", "superseded", "accepted", "closed", null]},
+          "confidence": {"enum": ["verified", "assumed", null], "description": "Findings only."},
+          "summary": {"type": "string"},
+          "systems": {"type": "array", "items": {"type": "string"}},
+          "repos": {"type": "array", "items": {"type": "string"}},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "updated": {"type": ["string", "null"], "description": "YYYY-MM-DD."},
+          "expires": {"type": ["string", "null"], "description": "YYYY-MM-DD, findings only."}
+        }
+      }
+    }
+  }
+}

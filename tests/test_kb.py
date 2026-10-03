@@ -28,7 +28,7 @@ class Sandbox(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.root = Path(tmp.name).resolve() / "kb"
         shutil.copytree(REPO, self.root, symlinks=True,
-                        ignore=shutil.ignore_patterns(".git", "__pycache__", "index.md"))
+                        ignore=shutil.ignore_patterns(".git", "__pycache__", "index.md", "index-full.md", ".queries"))
         self.finding = self.root / "memory" / "findings" / "F-2026-09-16-001.md"
 
     def edit(self, path, old, new):
@@ -71,7 +71,7 @@ class SchemaTest(Sandbox):
 
 
 class CliTest(Sandbox):
-    def test_search_is_exact_words_with_filters(self):
+    def test_search_with_filters(self):
         _, out = run("--repo", str(self.root), "search", "token")
         self.assertIn("F-2026-09-16-001", out)
         _, out = run("--repo", str(self.root), "search", "symlinks", "--status", "open")
@@ -116,8 +116,8 @@ class CliTest(Sandbox):
 
     def test_gen_index_and_init_repo(self):
         _, out = run("--repo", str(self.root), "gen-index")
-        self.assertIn("5 entries", out)
-        self.assertIn("F-2026-09-16-001", (self.root / "index.md").read_text())
+        self.assertIn("index-full.md: 5 records", out)
+        self.assertIn("F-2026-09-16-001", (self.root / "index-full.md").read_text())
         target = self.root.parent / "some-code-repo"
         target.mkdir()
         run("--repo", str(self.root), "init-repo", str(target))

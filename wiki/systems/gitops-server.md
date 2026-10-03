@@ -2,6 +2,7 @@
 type: wiki
 summary: "The GitOps server that deploys every workload; people log in through SSO, tools use a local read-only account"
 owner: platform-team
+aliases: [deploy server, "continuous delivery"]
 sources: [raw/2026-09-16-gitops-token-notes]
 updated: 2026-09-16
 ---

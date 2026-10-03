@@ -8,7 +8,10 @@ description: Bring an external source into the knowledge repo and distil it into
 # Ingest
 
 1. Save the source under `raw/` as `<date>-<slug>.md`, unchanged.
-2. Find the wiki pages it touches (`acme-kb search`). Update them, or create a page
-   under `wiki/systems/` with the sections "What it is", "How we run it", "Traps".
-3. List the source in the page's `sources` and set `updated` to today.
+2. Find the wiki pages it touches (`acme-kb search <system>`). Lines after
+   `-- not every term matched --` are partial matches, so a page exists only if a result is
+   about that system. Update it, or create a page under `wiki/systems/` with the sections
+   "What it is", "How we run it", "Traps".
+3. List the source in the page's `sources` and set `updated` to today. If people call the
+   system by a name the page does not hold, add it to `aliases`.
 4. Run `acme-kb validate`, then open a pull request.

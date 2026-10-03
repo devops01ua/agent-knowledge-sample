@@ -30,8 +30,9 @@ scripts/check.sh     the gate, also run in CI
 ```bash
 uv tool install git+https://github.com/devops01ua/agent-knowledge-sample.git
 acme-kb setup                      # clone to ~/.acme-knowledge, link the skills
-acme-kb search token               # exact-word search over every record
+acme-kb search gitops token        # ranked search over every record
 acme-kb search rollout --type incident
+acme-kb search token --json        # the same results for a script
 ```
 
 Or without installing, from a clone:
@@ -52,7 +53,7 @@ claude plugin install acme-knowledge@acme
 
 ```bash
 acme-kb sync                                   # 1. the agent pulls the fresh knowledge
-acme-kb search gitops token                    # 2. searches by exact words
+acme-kb search gitops token                    # 2. ranked search, ten lines
 #                                                3. reads two or three records and answers with a footer:
 #   source: F-2026-09-16-001 (verified) · wiki/systems/gitops-server (2026-09-16) · owner: platform-team
 acme-kb new finding "One sentence you can act on"   # 4. after the human says yes
@@ -70,11 +71,12 @@ confidence is honest, there are no secrets.
 | --- | --- |
 | `acme-kb setup` | clone or update the checkout and link the skills into `~/.claude/skills` and `~/.agents/skills` |
 | `acme-kb sync` | `git pull --ff-only` in the checkout |
-| `acme-kb search <words> [--type] [--status] [--in-repo]` | every word must occur; no synonyms, no ranking |
+| `acme-kb search [<words>] [--type] [--status] [--in-repo] [--limit N] [--json]` | records holding every word first, best first (BM25), then those holding some; without words, the filtered list |
+| `acme-kb queries [--days N]` | report from the local search log: misses, rephrased searches |
 | `acme-kb new finding\|decision\|incident "<summary>"` | a record from its template with the next id |
 | `acme-kb validate` | schema, dead links, required sections; expired open records as warnings |
 | `acme-kb capture <id>` | validate that record and commit it on `capture/<id>` |
-| `acme-kb gen-index` | write a local `index.md` (not tracked) |
+| `acme-kb gen-index` | write a local `index.md` (system map) and `index-full.md` (every record), not tracked |
 | `acme-kb init-repo <path>` | add an `AGENTS.md` compass to a code repository |
 
 ## Rules worth copying
@@ -83,11 +85,22 @@ confidence is honest, there are no secrets.
 - `confidence: verified` only for what somebody observed, and it needs evidence.
 - Every finding expires (180 days by default). An expired open record is a warning.
 - The agent asks before it writes, and a human reviews every record.
-- The generated index stays out of git.
+- The generated index and the search log stay out of git.
+- A search that missed is a signal: `acme-kb queries` lists the misses, and the answer is an
+  `aliases` entry on the page that should have been found, or a new page.
+
+## How search ranks
+
+Every record is put in an in-memory SQLite FTS5 table on each call (the repo is small, so
+there is no index file to go stale). A record that holds every word comes first, ordered by
+BM25, with the path, id, summary, systems and aliases weighing more than the body. Records
+that hold only some of the words follow after `-- not every term matched --`. Without FTS5
+in your Python's SQLite the same records come back, ordered by how many words they hold.
 
 ## Honest limits
 
-- The search matches exact words: `nightmode` will not find `night mode`.
+- Search knows words and word forms, not meaning: `nightmode` will not find `night mode`
+  unless a page lists it in `aliases`.
 - The gate checks the form. Contradictions between pages are found by a person with an
   agent, once a month (the `lint` skill).
 - `setup` links skills; a tool that ignores symlinked skills needs copies instead.

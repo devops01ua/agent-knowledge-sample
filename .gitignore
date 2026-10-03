@@ -5,5 +5,8 @@ __pycache__/
 build/
 dist/
 .DS_Store
-# generated locally by acme-kb gen-index
+# generated locally by acme-kb gen-index: a system map and the full list
 /index.md
+/index-full.md
+# the personal search log of acme-kb search, read by acme-kb queries
+/.queries/

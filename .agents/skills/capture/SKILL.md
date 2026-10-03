@@ -9,8 +9,11 @@ description: Record something the team learned as a finding, a decision or an in
 # Capture
 
 1. Say in one sentence what you would record and ask the user for a yes.
-2. `acme-kb new finding "<summary>"` (or `decision`, `incident`).
-3. Fill every field. `confidence: verified` only if it was observed in this session;
+2. Check it is not there already: `acme-kb search <two or three words>`. Only lines above
+   `-- not every term matched --` hold every word.
+3. `acme-kb new finding "<summary>"` (or `decision`, `incident`).
+4. Fill every field. Add `aliases: [..]` when people would search by a name the summary
+   does not hold. `confidence: verified` only if it was observed in this session;
    add the evidence (commit, pull request, file path).
-4. Remove secrets, tokens, host names and personal data.
-5. `acme-kb capture <id>`, push the branch and open a pull request.
+5. Remove secrets, tokens, host names and personal data.
+6. `acme-kb capture <id>`, push the branch and open a pull request.

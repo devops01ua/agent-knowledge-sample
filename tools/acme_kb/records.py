@@ -35,6 +35,9 @@ ENUMS = {
     "confidence": ["verified", "assumed"],
 }
 LIST_FIELDS = {"repos", "systems", "evidence", "rejected", "sources"}
+# Optional on every record and page: the other names people search by. Written as [a, b] or
+# not at all; a bare value is an error, not a list of one.
+STRICT_LISTS = {"aliases"}
 DATE_FIELDS = {"updated", "expires"}
 SYSTEM_SECTIONS = ["## What it is", "## How we run it", "## Traps"]
 LINK = re.compile(r"\[\[([^\]|#]+)")
@@ -121,6 +124,9 @@ def check(root, today=None):
         for key, allowed in ENUMS.items():
             if key in rec.meta and rec.meta[key] not in allowed:
                 err(f"{key} must be one of {', '.join(allowed)}")
+        for key in STRICT_LISTS & rec.meta.keys():
+            if not isinstance(rec.meta[key], list):
+                err(f"{key} must be a list like [a, b]")
         dates = {}
         for key in DATE_FIELDS & rec.meta.keys():
             try:

@@ -8,8 +8,10 @@ description: Look things up in the team's shared knowledge before acting. Use wh
 # Knowledge
 
 1. Run `acme-kb sync`.
-2. Run `acme-kb search <word>` with the shortest distinctive word. The search matches
-   exact words; if nothing comes back, try another word before giving up.
+2. Run `acme-kb search <two or three words>`, add `--in-repo <repo>` for a question about
+   one repository. Results are ranked, ten lines (`--limit N`, 0 for all); lines after
+   `-- not every term matched --` are nearby, not a match. Nothing useful: open `index.md`,
+   pick the system, `acme-kb search <system>`.
 3. Read at most three records. Take exact values from `raw/`.
 4. Answer, then add the footer:
    `source: <id> (<confidence>) · <wiki page> (<updated>) · owner: <owner>`

@@ -10,6 +10,10 @@ Agents Learned to Remember", and the second half of
 the tools the agents work with. Everything here is a sample: the systems, names and
 records are made up.
 
+## How it fits together
+
+An interactive map of the marketplace, the laptop, this repo and the project repos, with the main flows step by step: [docs/architecture.html](https://devops01ua.github.io/agent-knowledge-sample/architecture.html) (open the file locally if the page is not published yet).
+
 ## What is inside
 
 ```text

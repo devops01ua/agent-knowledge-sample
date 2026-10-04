@@ -6,189 +6,183 @@
 <title>How the Chronicle fits together</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* One look on purpose: warm paper, teal for the knowledge flow, burnt orange for people and review. */
+/* Layout: four zones in one row, joined by three labelled connectors; no lines between items.
+   A flow numbers the items it touches and lists the steps underneath. One deliberate look. */
 :root{
-  --paper:#F7F3EA; --card:#FFFDF8; --ink:#1F2422; --soft:#5E6662; --line:#D8D0BF; --faint:#E7E0D1;
-  --teal:#0B6B63; --teal-soft:#DCEFEB; --orange:#B5560C; --orange-soft:#F6E5D3;
+  --paper:#F6F1E7; --card:#FFFCF6; --ink:#20251F; --soft:#626A63; --line:#DDD3C0; --chip:#F3EDE1;
+  --teal:#0B6B63; --teal-soft:#D9EEEA; --orange:#B5560C; --orange-soft:#F7E3CF;
   --sans:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
   color-scheme:light;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding:24px 16px 48px}
-.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-h1{font-size:30px;margin:0;line-height:1.2}
-.lead{margin:0;color:var(--soft);font-size:16px;line-height:1.5;max-width:75ch}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);padding:28px 16px 40px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{margin:0;font-size:28px;line-height:1.2}
+.lead{margin:0;color:var(--soft);font-size:16px;line-height:1.5;max-width:70ch}
 .flows{display:flex;flex-wrap:wrap;gap:8px}
 .flows button{font:500 14px var(--mono);background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}
-.flows button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
-.flows button:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
-.main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
-.board{background:var(--card);border:1.5px solid var(--line);border-radius:14px;overflow-x:auto}
-svg{display:block;width:100%;min-width:900px;height:auto}
-.side{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5}
-.side h2{margin:0;font-size:18px}
-.side ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
-.side .muted{color:var(--soft)}
-.node rect{fill:var(--card);stroke:var(--line);stroke-width:1.5;rx:10}
-.node text.t{font:600 14px var(--sans);fill:var(--ink)}
-.node text.s{font:400 11.5px var(--mono);fill:var(--soft)}
-.node{cursor:pointer}
-.node.human rect{fill:var(--orange-soft);stroke:#E3C3A3}
-.node.on rect{stroke:var(--teal);stroke-width:2.5;fill:var(--teal-soft)}
-.node.human.on rect{stroke:var(--orange);fill:var(--orange-soft)}
-.node:focus-visible rect{stroke:var(--orange);stroke-width:3}
-.col-title{font:600 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;fill:var(--teal)}
-.col-sub{font:400 12px var(--sans);fill:var(--soft)}
-.lane{fill:none;stroke:var(--faint);stroke-width:1.5;stroke-dasharray:4 5}
-.edge{fill:none;stroke:#C9C0AD;stroke-width:1.6}
-.edge.on{stroke:var(--teal);stroke-width:3}
-.edge.on.human{stroke:var(--orange)}
-.step circle{fill:var(--teal)} .step.human circle{fill:var(--orange)}
-.step text{font:700 12px var(--sans);fill:#fff;text-anchor:middle;dominant-baseline:central}
-.dim .node:not(.on) rect{opacity:.45} .dim .node:not(.on) text{opacity:.5}
-.foot{font-size:13px;color:var(--soft)}
-@media (max-width:980px){.main{grid-template-columns:minmax(0,1fr)}}
-@media (prefers-reduced-motion:no-preference){.edge,.node rect{transition:stroke .2s,fill .2s,opacity .2s}}
+.flows button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--card)}
+button:focus-visible,.item:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+.board{display:grid;grid-template-columns:minmax(0,1fr) 84px minmax(0,1fr) 84px minmax(0,1.15fr) 84px minmax(0,1fr);align-items:stretch}
+.zone{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.zone header{display:flex;flex-direction:column;gap:2px;padding-bottom:4px}
+.zone h2{margin:0;font-size:19px}
+.zone .kind{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+.zone .what{font-size:13px;color:var(--soft)}
+.item{position:relative;background:var(--chip);border:1.5px solid transparent;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.item b{font-size:15px;font-weight:600}
+.item span{font:400 12.5px var(--mono);color:var(--soft);overflow-wrap:anywhere}
+.item.human{background:var(--orange-soft)}
+.item .n{position:absolute;top:-9px;right:-9px;min-width:24px;height:24px;border-radius:12px;background:var(--teal);color:#fff;font:700 13px var(--sans);display:none;align-items:center;justify-content:center;padding:0 6px}
+.item.human .n{background:var(--orange)}
+.board.flow .item{opacity:.38}
+.board.flow .item.on{opacity:1;border-color:var(--teal);background:var(--teal-soft)}
+.board.flow .item.on.human{border-color:var(--orange);background:var(--orange-soft)}
+.board.flow .item.on .n{display:flex}
+.board.pick .item{opacity:.38} .board.pick .item.sel{opacity:1;border-color:var(--ink)}
+
+.conn{display:flex;flex-direction:column;justify-content:center;gap:26px;padding:0 6px}
+.arrow{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--soft);transition:color .2s}
+.arrow .line{width:100%;height:2px;background:currentColor;position:relative}
+.arrow.r .line::after,.arrow.l .line::before{content:"";position:absolute;top:-5px;border:6px solid transparent}
+.arrow.r .line::after{right:-2px;border-left:8px solid currentColor;border-right:0}
+.arrow.l .line::before{left:-2px;border-right:8px solid currentColor;border-left:0}
+.arrow small{font:500 11.5px var(--mono);text-align:center;line-height:1.3}
+.board.flow .arrow{color:#CFC6B4} .board.flow .arrow.on{color:var(--teal)}
+
+.steps{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px 20px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:10px 28px;align-items:start}
+.steps h3{margin:0;font-size:18px} .steps p{margin:0;color:var(--soft);line-height:1.5}
+.steps ol{margin:0;padding-left:22px;display:grid;gap:6px;line-height:1.5;grid-column:2;grid-row:1 / span 2}
+.steps ol li::marker{font-weight:700;color:var(--teal)}
+.foot{font-size:13px;color:var(--soft);margin:0}
+body.static{padding:20px}
+body.static h1,body.static .lead,body.static .flows,body.static .steps,body.static .foot{display:none}
+body.figure{padding:20px} body.figure h1,body.figure .lead,body.figure .flows,body.figure .foot{display:none}
+@media (max-width:900px){
+  .board{grid-template-columns:minmax(0,1fr);gap:0}
+  .conn{flex-direction:row;justify-content:center;padding:8px 0;gap:28px}
+  .arrow{width:140px} .arrow .line{transform:rotate(90deg);width:28px;margin:10px 0}
+  .steps{grid-template-columns:minmax(0,1fr)} .steps ol{grid-column:1;grid-row:auto}
+}
+@media (prefers-reduced-motion:no-preference){.item{transition:opacity .2s,border-color .2s,background .2s}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>How the Chronicle fits together</h1>
-  <p class="lead">Three repositories and a laptop. Pick a flow to follow it step by step, or click any box to see what it is. All names are from the sample: <code>acme-kb</code>, <code>acme-knowledge</code>, <code>acme-platform</code>.</p>
+  <p class="lead">Three repositories and a laptop. Pick a flow to see which parts it touches and in what order, or click any part to see what it does. Names are from the sample: <code>acme-kb</code>, <code>acme-knowledge</code>, <code>acme-platform</code>.</p>
   <div class="flows" id="flows" role="group" aria-label="Flows"></div>
-  <div class="main">
-    <div class="board"><svg id="svg" viewBox="0 0 1200 760" role="img" aria-label="Diagram of the marketplace, the laptop, the knowledge repository, project repositories and other readers"></svg></div>
-    <aside class="side" id="side" aria-live="polite"></aside>
+
+  <div class="board" id="board">
+    <section class="zone">
+      <header><span class="kind">marketplace repo</span><h2>The Book</h2><span class="what">the same plugins for four agents</span></header>
+      <button class="item" data-id="plugin"><b>wiki plugin</b><span>stop hook, setup skill</span><i class="n"></i></button>
+      <button class="item" data-id="mcp"><b>MCP plugins</b><span>GitOps, k8s, metrics, docs</span><i class="n"></i></button>
+    </section>
+    <div class="conn"><div class="arrow r" data-a="install"><div class="line"></div><small>install</small></div></div>
+    <section class="zone">
+      <header><span class="kind">one builder</span><h2>The laptop</h2><span class="what">any of the four agents</span></header>
+      <button class="item" data-id="agent"><b>familiar</b><span>Claude Code, Codex, Kiro, Antigravity</span><i class="n"></i></button>
+      <button class="item" data-id="skills"><b>five skills + hook</b><span>knowledge, capture, ingest, lint, start-task</span><i class="n"></i></button>
+      <button class="item" data-id="cli"><b>acme-kb CLI</b><span>sync, search, capture, queries</span><i class="n"></i></button>
+      <button class="item" data-id="clone"><b>local clone</b><span>index map, search log</span><i class="n"></i></button>
+    </section>
+    <div class="conn">
+      <div class="arrow l" data-a="sync"><div class="line"></div><small>sync</small></div>
+      <div class="arrow r" data-a="mr"><div class="line"></div><small>merge request</small></div>
+    </div>
+    <section class="zone">
+      <header><span class="kind">knowledge repo</span><h2>The Chronicle</h2><span class="what">markdown in git</span></header>
+      <button class="item" data-id="schema"><b>AGENTS.md</b><span>the schema for the editor</span><i class="n"></i></button>
+      <button class="item" data-id="wiki"><b>wiki/</b><span>systems, topics, repo catalogue</span><i class="n"></i></button>
+      <button class="item" data-id="memory"><b>memory/</b><span>findings, decisions, incidents</span><i class="n"></i></button>
+      <button class="item human" data-id="review"><b>review</b><span>CI gate, then a colleague</span><i class="n"></i></button>
+    </section>
+    <div class="conn">
+      <div class="arrow l" data-a="catalogue"><div class="line"></div><small>catalogue</small></div>
+      <div class="arrow r" data-a="read"><div class="line"></div><small>clone, export</small></div>
+    </div>
+    <section class="zone">
+      <header><span class="kind">around it</span><h2>Other repos and readers</h2><span class="what">no laptop needed</span></header>
+      <button class="item" data-id="compass"><b>project repos</b><span>an AGENTS.md compass each</span><i class="n"></i></button>
+      <button class="item" data-id="live"><b>live systems</b><span>read through MCP</span><i class="n"></i></button>
+      <button class="item" data-id="ci"><b>CI agents</b><span>clone + CLI --json</span><i class="n"></i></button>
+      <button class="item" data-id="hosted"><b>hosted ops agent</b><span>export after merge</span><i class="n"></i></button>
+    </section>
   </div>
+
+  <div class="steps" id="steps" aria-live="polite"></div>
   <p class="foot">From the tales "The Chronicle of the Tower" and "The Chronicle Learns to Search". Sample repo: github.com/devops01ua/agent-knowledge-sample</p>
 </div>
 <script>
-const COLS=[
-  {x:20,w:250,title:"The Book",sub:"marketplace repo, acme-platform"},
-  {x:320,w:270,title:"The laptop",sub:"one builder, any of four agents"},
-  {x:640,w:290,title:"The Chronicle",sub:"knowledge repo, acme-knowledge"},
-  {x:980,w:200,title:"Around it",sub:"project repos and other readers"}];
-const N={
-  plugin:[0,100,"wiki plugin","stop hook + setup skill","Installed from the marketplace like any other plugin. It carries two things: the stop hook and a setup skill that clones the Chronicle and installs the CLI."],
-  mcp:[0,200,"MCP plugins","GitOps, k8s, metrics, docs","Live access to the systems we run. The familiar reads the human wiki and tickets through MCP instead of copying them into the Chronicle."],
-  packs:[0,300,"skill packs","how we do X here","Procedures for other work (Terraform, Helm, CI). The export step translates every plugin into the dialect of each agent."],
-  agent:[1,100,"familiar","Claude Code, Codex, Kiro, Antigravity","The coding agent of one builder. It starts every session with an empty memory and uses the skills to read and write the Chronicle."],
-  hook:[1,190,"stop hook","nudge at the end of a turn","No model, never blocks. Suggests capture after infra work, and once a month suggests sharing the search misses."],
-  skills:[1,280,"five skills","knowledge, capture, lint, ...","Linked from the local clone into the agent, so a merged change to a skill reaches everyone on the next sync."],
-  cli:[1,370,"acme-kb CLI","sync, search, new, capture, queries","Python stdlib only. Search is ranked BM25 over an in-memory SQLite FTS5 table; --json prints records under a versioned schema."],
-  clone:[1,460,"local clone","~/.acme-knowledge","A git checkout of the Chronicle. Pulled before every search, so a colleague's finding is there right after merge."],
-  local:[1,550,"local files, not in git","index.md map, search log","index.md: one line per system with open records; index-full.md: every page. .queries/: one line per search, misses shared once a month."],
-  schema:[2,100,"AGENTS.md","the schema for the editor","Frontmatter rules, record types, statuses, aliases, the review rules. Every agent reads the same file."],
-  wiki:[2,190,"wiki/","systems, topics, repo catalogue","Pages written and maintained by familiars. wiki/repos.md and wiki/deps.md are generated from the compass of every project repo."],
-  memory:[2,280,"memory/","findings, decisions, incidents","One file per record with id, status, confidence, summary, systems, repos, evidence, expires. Status changes go through a merge request too."],
-  raw:[2,370,"raw/","sources as they are","Ingested docs and pages, never edited. Wiki pages quote exact values from here."],
-  log:[2,460,"log/","one file per operation","Captures, ingests, lint runs and the monthly search misses. A file per item, so open merge requests never conflict."],
-  gate:[2,550,"CI gate","python and git only","Schema, dead links, required sections, expired records, secrets in the diff."],
-  review:[2,650,"merge request review","a colleague, one minute","Can you act on the summary, is there evidence, is the confidence honest, no secrets. The only way into main.",true],
-  compass:[3,100,"project repos","AGENTS.md compass","Why the repo exists, which commands matter, where the traps are, what it provides and consumes."],
-  live:[3,200,"live systems","clusters, dashboards, wiki","Reached through MCP, read-only from the familiar. Never copied into the Chronicle."],
-  ciagent:[3,460,"CI agent","clone + CLI --json","No MCP needed: a checkout of the Chronicle and the same CLI on a runner with python and git."],
-  hosted:[3,550,"hosted ops agent","static export","Cannot run a CLI. Gets an export after merge; a small read-only MCP server only if the export is not enough."]};
-const E={
-  e_install:["plugin","agent","install"],
-  e_setup:["plugin","clone","setup skill clones"],
-  e_link:["clone","skills","links skills"],
-  e_cli:["plugin","cli","installs CLI"],
-  e_ask:["agent","skills","uses"],
-  e_sync:["cli","clone","sync / search"],
-  e_pull:["clone","memory","git pull"],
-  e_wikiread:["clone","wiki","reads"],
-  e_local:["cli","local","writes"],
-  e_mcp:["agent","live","MCP"],
-  e_mcpi:["mcp","agent","install"],
-  e_hook:["agent","hook","end of turn"],
-  e_capture:["skills","cli","capture"],
-  e_branch:["cli","gate","branch + MR"],
-  e_review:["gate","review","then"],
-  e_merge:["review","memory","merge to main"],
-  e_logw:["cli","log","log file"],
-  e_misses:["local","log","misses MR"],
-  e_schema:["skills","schema","follow"],
-  e_compass:["compass","wiki","gen-indexes"],
-  e_ci:["ciagent","clone","clone"],
-  e_export:["memory","hosted","export after merge"],
-  e_lint:["skills","wiki","lint"],
-  e_raw:["raw","wiki","quoted by"],
-  e_packs:["packs","agent","install"]};
+const INFO={
+  plugin:["wiki plugin","Installed from the marketplace like any other plugin. It carries the stop hook and a setup skill that clones the Chronicle and installs the CLI."],
+  mcp:["MCP plugins","Live, read-only access to the systems we run and to the human wiki and tickets. They are read live, never copied into the Chronicle."],
+  agent:["familiar","The coding agent of one builder. Every session starts with an empty memory, so it reads the Chronicle through the skills."],
+  skills:["five skills + hook","Linked from the local clone, so a merged change to a skill reaches everyone on the next sync. The stop hook suggests capture after infra work and, once a month, sharing the search misses."],
+  cli:["acme-kb CLI","Python standard library only. Ranked search (BM25 over an in-memory SQLite FTS5 table), --json with a versioned schema, capture on its own branch, a local search log."],
+  clone:["local clone","A git checkout of the Chronicle, pulled before every search. Next to it, files git ignores: index.md (one line per system), index-full.md and the search log."],
+  schema:["AGENTS.md","The rules for a familiar acting as an editor: record types, fields, statuses, aliases, how changes are reviewed. The same file for every agent."],
+  wiki:["wiki/","Pages about systems and practices, written and kept up to date by familiars. The repo catalogue in it is generated from the compass of every project repo."],
+  memory:["memory/","One file per finding, decision or incident, with status, confidence, evidence and an expiry date. Changing a status is a merge request too."],
+  review:["review","CI checks the form (schema, links, secrets, expired records). A colleague checks the content: can you act on it, is there evidence, is the confidence honest."],
+  compass:["project repos","Each has an AGENTS.md next to the code: why the repo exists, the commands that matter, the traps, what it provides and consumes."],
+  live:["live systems","Clusters, dashboards, the human wiki and tickets. The familiar reads them through MCP; the Chronicle points to them, it does not copy them."],
+  ci:["CI agents","A checkout of the Chronicle and the same CLI with --json on a runner that has python and git. No MCP needed."],
+  hosted:["hosted ops agent","It cannot run a CLI, so it gets an export after every merge. A small read-only MCP server only if the export is not enough."]};
 const FLOWS=[
-  ["Overview",[],"Click a flow above or any box. Teal lines are the knowledge flow, orange marks the human step.",[]],
-  ["Set up a laptop",["plugin","mcp","agent","clone","skills","cli"],"One plugin, one skill run.",[
-    ["e_install","Install the wiki plugin from the marketplace into any of the four agents."],
-    ["e_mcpi","The MCP plugins come from the same marketplace."],
-    ["e_setup","Its setup skill clones the Chronicle to ~/.acme-knowledge."],
-    ["e_cli","It installs the acme-kb CLI from that clone."],
-    ["e_link","It links the five skills into the agent."]]],
-  ["Look something up",["agent","skills","cli","clone","memory","wiki","local","live"],"\"How do we do this here?\"",[
-    ["e_ask","The familiar runs the knowledge skill."],
-    ["e_sync","The skill runs acme-kb sync, then a ranked search."],
-    ["e_pull","Sync pulls main, so yesterday's merged findings are there."],
-    ["e_wikiread","It reads two or three pages and answers with a source footer."],
-    ["e_local","The search lands in the local search log; a miss is counted."],
-    ["e_mcp","Nothing in the Chronicle? Fall back to the human wiki and tickets through MCP."]]],
-  ["Capture a finding",["agent","hook","skills","cli","gate","review","memory","log"],"From one laptop to every familiar.",[
-    ["e_hook","At the end of a turn the stop hook suggests capture."],
-    ["e_capture","With the builder's yes, the capture skill fills the record by the schema."],
-    ["e_branch","acme-kb capture validates, commits on its own branch and opens the merge request."],
-    ["e_logw","The log file for the capture goes in the same branch."],
-    ["e_review","CI checks the form, a colleague checks the content.",true],
-    ["e_merge","Merged to main: every familiar has it on the next sync.",true]]],
-  ["Onboard a repo",["compass","wiki","schema","skills"],"A compass next to the code.",[
-    ["e_compass","init-repo adds AGENTS.md to a project repo; gen-indexes turns all of them into the repo catalogue."],
-    ["e_schema","The skills follow the same schema in every repo."]]],
-  ["Monthly ritual",["local","log","skills","wiki","raw","review"],"Rituals get skipped, so the hook reminds.",[
-    ["e_misses","queries --export --push sends this month's misses as a merge request; each gets an alias or a page."],
-    ["e_lint","The lint skill reads for contradictions, expired records and missing pages."],
-    ["e_raw","Exact values are checked against raw sources."]]],
-  ["Other readers",["ciagent","clone","memory","hosted"],"Readers without a laptop.",[
-    ["e_ci","A CI agent clones the Chronicle and runs the same CLI with --json."],
-    ["e_export","A hosted ops agent gets an export after every merge; MCP only if that is not enough."]]]];
-
-const svg=document.getElementById("svg"), NS="http://www.w3.org/2000/svg", W=COLS.map(c=>c.w), H=58;
-const mk=(t,a,p=svg)=>{const e=document.createElementNS(NS,t); for(const k in a)e.setAttribute(k,a[k]); p.append(e); return e};
-const box=id=>{const [c,y]=N[id]; return {x:COLS[c].x,y,w:COLS[c].w,h:H,c}};
-COLS.forEach(c=>{mk("rect",{class:"lane",x:c.x-8,y:20,width:c.w+16,height:722,rx:14});
-  mk("text",{class:"col-title",x:c.x,y:48}).textContent=c.title; mk("text",{class:"col-sub",x:c.x,y:66}).textContent=c.sub});
-const edgeG=mk("g",{}), stepG=mk("g",{}), nodeG=mk("g",{});
-function anchor(a,b){if(a.c!==b.c){const right=a.c<b.c; return [right?a.x+a.w:a.x, a.y+H/2, right?b.x:b.x+b.w, b.y+H/2]}
-  const down=a.y<b.y; return [a.x+a.w-18, down?a.y+H:a.y, b.x+b.w-18, down?b.y:b.y+H]}
-const paths={};
-for(const id in E){const [f,t]=E[id], a=box(f), b=box(t); let [x1,y1,x2,y2]=anchor(a,b), d;
-  if(a.c===b.c){const bend=x1+46; d=`M${x1} ${y1} C${bend} ${y1+(y2>y1?30:-30)},${bend} ${y2+(y2>y1?-30:30)},${x2} ${y2}`}
-  else{const mx=(x1+x2)/2; d=`M${x1} ${y1} C${mx} ${y1},${mx} ${y2},${x2} ${y2}`}
-  paths[id]=mk("path",{class:"edge",d},edgeG)}
-const nodes={};
-for(const id in N){const b=box(id), human=N[id][5]; const g=mk("g",{class:"node"+(human?" human":""),tabindex:0,role:"button","aria-label":N[id][2]},nodeG);
-  mk("rect",{x:b.x,y:b.y,width:b.w,height:H,rx:10},g);
-  mk("text",{class:"t",x:b.x+12,y:b.y+24},g).textContent=N[id][2];
-  mk("text",{class:"s",x:b.x+12,y:b.y+43},g).textContent=N[id][3];
-  g.addEventListener("click",()=>showNode(id)); g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();showNode(id)}});
-  nodes[id]=g}
-const side=document.getElementById("side");
-function clear(){Object.values(paths).forEach(p=>p.setAttribute("class","edge")); Object.values(nodes).forEach(n=>n.classList.remove("on")); stepG.textContent=""; svg.classList.remove("dim")}
-function showFlow(i){clear(); const [name,on,lead,steps]=FLOWS[i]; side.textContent="";
-  const h=document.createElement("h2"); h.textContent=name; side.append(h);
-  const p=document.createElement("p"); p.className="muted"; p.style.margin="0"; p.textContent=lead; side.append(p);
-  if(!steps.length)return; svg.classList.add("dim"); on.forEach(n=>nodes[n].classList.add("on"));
-  const ol=document.createElement("ol"); steps.forEach(([eid,text,human],k)=>{const path=paths[eid]; path.setAttribute("class","edge on"+(human?" human":""));
-    const pt=path.getPointAtLength(path.getTotalLength()/2), g=mk("g",{class:"step"+(human?" human":"")},stepG);
-    mk("circle",{cx:pt.x,cy:pt.y,r:11},g); mk("text",{x:pt.x,y:pt.y+.5},g).textContent=k+1;
-    const li=document.createElement("li"); li.textContent=text; ol.append(li)}); side.append(ol)}
-function showNode(id){clear(); svg.classList.add("dim"); nodes[id].classList.add("on");
-  for(const eid in E){if(E[eid].includes(id)){paths[eid].setAttribute("class","edge on"); nodes[E[eid][0]].classList.add("on"); nodes[E[eid][1]].classList.add("on")}}
-  side.textContent=""; const h=document.createElement("h2"); h.textContent=N[id][2]; const s=document.createElement("p"); s.className="muted"; s.style.margin="0"; s.textContent=N[id][3];
-  const d=document.createElement("p"); d.style.margin="0"; d.textContent=N[id][4]; side.append(h,s,d);
+  ["Overview",[],[],"The four zones and how they talk to each other. Pick a flow to follow it.",[]],
+  ["Set up a laptop",["plugin","agent","clone","cli","skills"],["install"],"One plugin, one skill run.",[
+    "Install the wiki plugin from the marketplace into any of the four agents.",
+    "Ask the familiar to run the setup skill.",
+    "It clones the Chronicle to the laptop,",
+    "installs the acme-kb CLI from that clone,",
+    "and links the five skills and the hook into the agent."]],
+  ["Look something up",["agent","skills","cli","clone","memory","live"],["sync"],"\"How do we do this here?\"",[
+    "The familiar runs the knowledge skill.",
+    "The skill calls acme-kb: sync, then a ranked search.",
+    "Sync pulls main, so yesterday's merged findings are there; the search is logged locally.",
+    "It reads two or three pages and answers with a source footer.",
+    "Pages in the answer come from memory/ and wiki/.",
+    "Nothing there? It falls back to the human wiki and tickets through MCP."]],
+  ["Capture a finding",["skills","agent","cli","review","memory"],["mr","sync"],"From one laptop to every familiar.",[
+    "At the end of a turn the hook suggests capture.",
+    "With the builder's yes, the familiar fills the record by the schema.",
+    "acme-kb capture validates it, commits on its own branch and opens a merge request.",
+    "CI checks the form, a colleague checks the content.",
+    "After the merge, every familiar has it on its next sync."]],
+  ["Onboard a repo",["compass","wiki","schema"],["catalogue"],"A compass next to the code.",[
+    "init-repo adds an AGENTS.md to a project repo.",
+    "gen-indexes reads every compass and writes the repo catalogue into wiki/.",
+    "The same schema rules apply everywhere."]],
+  ["Monthly ritual",["clone","cli","review","wiki"],["mr"],"Rituals get skipped, so the hook reminds.",[
+    "The local search log has collected this month's misses.",
+    "acme-kb queries --export --push sends only the misses as a merge request.",
+    "A colleague reviews it with the lint skill: contradictions, expired records, missing pages.",
+    "Each miss gets an alias or a page."]],
+  ["Other readers",["memory","ci","hosted"],["read"],"Readers without a laptop.",[
+    "Everything they read is on main of the Chronicle.",
+    "A CI agent clones it and runs the same CLI with --json.",
+    "A hosted ops agent gets an export after every merge."]]];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const board=$("#board"), steps=$("#steps");
+const item=id=>document.querySelector(`.item[data-id="${id}"]`);
+function reset(){board.classList.remove("flow","pick"); $$(".item").forEach(i=>{i.classList.remove("on","sel"); i.querySelector(".n").textContent=""}); $$(".arrow").forEach(a=>a.classList.remove("on"))}
+function render(title,lead,list){steps.textContent=""; const h=document.createElement("h3"); h.textContent=title; const p=document.createElement("p"); p.textContent=lead; steps.append(h,p);
+  if(list.length){const ol=document.createElement("ol"); list.forEach(t=>{const li=document.createElement("li"); li.textContent=t; ol.append(li)}); steps.append(ol)}}
+function showFlow(i){reset(); const [name,ids,arrows,lead,list]=FLOWS[i]; render(name,lead,list); if(!ids.length)return;
+  board.classList.add("flow"); ids.forEach((id,k)=>{const el=item(id); el.classList.add("on"); el.querySelector(".n").textContent=k+1});
+  arrows.forEach(a=>document.querySelector(`.arrow[data-a="${a}"]`).classList.add("on"))}
+function showItem(id){reset(); board.classList.add("pick"); item(id).classList.add("sel"); render(INFO[id][0],INFO[id][1],[]);
   $$("#flows button").forEach(b=>b.setAttribute("aria-pressed","false"))}
-const $$=s=>[...document.querySelectorAll(s)];
 FLOWS.forEach((f,i)=>{const b=document.createElement("button"); b.type="button"; b.textContent=f[0]; b.setAttribute("aria-pressed",String(i===0));
   b.onclick=()=>{$$("#flows button").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); showFlow(i); try{history.replaceState(null,"","#flow-"+i)}catch(e){}};
-  document.getElementById("flows").append(b)});
-const m=location.hash.match(/^#flow-(\d)$/), start=m?+m[1]:0;
-$$("#flows button")[start]?.click();
+  $("#flows").append(b)});
+$$(".item").forEach(el=>el.addEventListener("click",()=>showItem(el.dataset.id)));
+if(location.search.includes("static"))document.body.classList.add("static");
+if(location.search.includes("figure"))document.body.classList.add("figure");
+const m=location.hash.match(/^#flow-(\d)$/); $$("#flows button")[m?+m[1]:0].click();
 </script>
 </body>
 </html>

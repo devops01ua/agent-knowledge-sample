@@ -231,6 +231,33 @@ class QueryLogTest(Sandbox):
         _, out = run("--repo", str(self.root), "queries", "--days", "0")
         self.assertIn("searches: 5", out)
 
+    def test_report_pairs_a_rephrased_search_with_the_page_the_last_one_found(self):
+        """A search that got results for the wrong pages is no miss, yet its words are what
+        somebody called the page the rephrased search found: an alias candidate."""
+        flow, gitops = "wiki/release-flow.md", "wiki/systems/gitops-server.md"
+
+        def log(terms, full, minutes, top, repo="platform", flags=None):
+            querylog.record(self.root, terms, flags or {}, full, 0, top,
+                            now=T0 + timedelta(minutes=minutes), repo=repo)
+        log(["gitflow"], 2, 0, [gitops], flags={"status": "open"})  # full matches, the wrong pages
+        log(["branching"], 0, 1, [])                               # a miss on the way
+        log(["release", "flow"], 1, 2, [flow])                     # the one that found it
+        log(["gitops", "sync"], 1, 3, [gitops], repo="other")      # another repo: not part of the chain
+        log(["release", "notes"], 1, 30, [flow])                   # the page was already shown: no candidate
+        log(["release", "flow"], 1, 31, [flow])
+        log(["canary"], 1, 60, [gitops])                           # rephrased into a miss: nothing was found
+        log(["blue", "green"], 0, 61, [])
+        log(["rollout"], 1, 90, [gitops], flags={"type": "finding"})  # the same words found it without the filter
+        log(["rollout"], 2, 91, [flow, gitops])
+        rep = querylog.report(querylog.read(self.root, days=0))
+        self.assertEqual(dict(rep["pairs"]), {("gitflow --status open", flow): 1, ("branching", flow): 1,
+                                              ("rollout --type finding", flow): 1})
+        self.assertEqual(rep["found_by"][("branching", flow)], "release flow")
+        text = querylog.format_report(rep)
+        self.assertIn("rephrased, then found, candidates for an alias on the page found:", text)
+        self.assertIn(f"  1 x gitflow --status open -> {flow} (found by: release flow)", text)
+        self.assertNotIn("canary ->", text)
+
     def test_read_keeps_the_window_and_skips_broken_lines(self):
         querylog.record(self.root, ["old"], {}, 1, 0, [], now=T0 - timedelta(days=40))
         querylog.record(self.root, ["new"], {}, 1, 0, [], now=T0)

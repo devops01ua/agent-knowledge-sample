@@ -3,7 +3,8 @@
 Every `acme-kb search` with terms appends one JSON line to `.queries/YYYY-MM.jsonl` in the
 checkout: the terms, the filters, how many records held every term and how many only some,
 the first paths and the repository the search was run from. The directory is ignored by git,
-so the log stays on the laptop that made it. `acme-kb queries` reports from it.
+so the log stays on the laptop that made it. `acme-kb queries` reports from it: the misses, and
+the searches that were rephrased until another one found a page.
 `ACME_KB_NO_QUERY_LOG=1` switches it off. A failure to write never fails the search.
 """
 import json
@@ -67,13 +68,34 @@ def label(row):
     return " ".join(row["terms"] + [f"--{k.replace('_', '-')} {v}" for k, v in flags])
 
 
+def pairs(rows):
+    """(a search, the search that ended its chain of rephrasings) when the last one found a page
+    the first had not shown. The words of the first are what somebody called that page, whether
+    the first search missed or returned full matches for other pages; the same words with a filter
+    dropped pair as well, and then the filter is the lead. Two unrelated searches five minutes
+    apart pair too: a lead for an alias, not a fact."""
+    out = []
+    for i, r in enumerate(rows):
+        last = r
+        for n in rows[i + 1:]:
+            if n["_ts"] - last["_ts"] > WINDOW:
+                break
+            if n.get("repo") == r.get("repo") and (n["terms"], n.get("flags")) != (last["terms"], last.get("flags")):
+                last = n  # other words, or the same words with other filters
+        if last is not r and last.get("full") and last.get("top") and last["top"][0] not in r.get("top", []):
+            out.append((r, last))
+    return out
+
+
 def report(rows):
     rephrased = sum(1 for i, r in enumerate(rows)
                     if any(n.get("repo") == r.get("repo") and n["terms"] != r["terms"]
                            and n["_ts"] - r["_ts"] <= WINDOW for n in rows[i + 1:i + 20]))
     missed = [r for r in rows if not r.get("full")]
+    found = [((label(r), last["top"][0]), label(last)) for r, last in pairs(rows)]
     return {"searches": len(rows), "no_full": len(missed), "rephrased": rephrased,
-            "misses": Counter(label(r) for r in missed)}
+            "misses": Counter(label(r) for r in missed),
+            "pairs": Counter(k for k, _ in found), "found_by": dict(found)}
 
 
 def format_report(rep):
@@ -86,4 +108,8 @@ def format_report(rep):
     if rep["misses"]:
         lines.append("top misses, candidates for an alias or a page:")
         lines += [f"  {count} x {query}" for query, count in rep["misses"].most_common(10)]
+    if rep["pairs"]:
+        lines.append("rephrased, then found, candidates for an alias on the page found:")
+        lines += [f"  {count} x {query} -> {page} (found by: {rep['found_by'][(query, page)]})"
+                  for (query, page), count in rep["pairs"].most_common(10)]
     return "\n".join(lines)

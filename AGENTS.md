@@ -53,8 +53,10 @@ an editor here, and these are the house rules. `CLAUDE.md` is a symlink to this 
   renamed or changes meaning.
 - Every search with words appends one line to `.queries/YYYY-MM.jsonl` in the checkout. It
   stays on your laptop; `ACME_KB_NO_QUERY_LOG=1` switches it off. `acme-kb queries` reports
-  the searches, how many had no full match, how many were rephrased within five minutes, and
-  the top misses: candidates for an alias or a new page.
+  the searches, how many had no full match, how many were rephrased within five minutes, the
+  top misses (candidates for an alias or a new page), and the searches that were rephrased
+  until another one found a page: the first words are an alias candidate for that page, also
+  when the first search had results.
 
 ## Changing a record
 

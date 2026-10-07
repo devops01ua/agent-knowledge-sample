@@ -91,7 +91,8 @@ confidence is honest, there are no secrets.
 - The agent asks before it writes, and a human reviews every record.
 - The generated index and the search log stay out of git.
 - A search that missed is a signal: `acme-kb queries` lists the misses, and the answer is an
-  `aliases` entry on the page that should have been found, or a new page.
+  `aliases` entry on the page that should have been found, or a new page. A search that was
+  rephrased until another one found a page is the same signal, even when the first try had results.
 
 ## How search ranks
 

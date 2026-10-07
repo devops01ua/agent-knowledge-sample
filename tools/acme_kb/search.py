@@ -33,12 +33,13 @@ def select(root, low, type=None, status=None, in_repo=None):
     for rec in records.load(root):
         if type and rec.kind != type:
             continue
-        if status and rec.meta.get("status") != status:
+        # A wiki page names no repo and has no status. With terms, --in-repo and --status scope
+        # the records that carry the field and keep the shared pages; without terms they list
+        # the matching records only.
+        shared = lambda field: bool(low) and field not in rec.meta
+        if status and not shared("status") and rec.meta.get("status") != status:
             continue
-        # A wiki page names no repo. With terms, --in-repo scopes the records that do name
-        # repos and keeps the shared pages; without terms it lists that repo's records only.
-        shared = bool(low) and "repos" not in rec.meta
-        if in_repo and not shared and in_repo not in as_list(rec.meta.get("repos")):
+        if in_repo and not shared("repos") and in_repo not in as_list(rec.meta.get("repos")):
             continue
         rel = rec.path.relative_to(root).as_posix()
         raw = rec.path.read_text()

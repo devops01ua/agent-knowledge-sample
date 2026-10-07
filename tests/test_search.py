@@ -83,6 +83,19 @@ class RepoFilterTest(SearchSandbox):
                          ["memory/findings/F-2026-09-16-001.md"])
 
 
+class StatusFilterTest(SearchSandbox):
+    def test_status_with_words_keeps_pages_without_a_status(self):
+        self.assertEqual(sorted(self.paths("gitops", "--status", "fixed")),
+                         ["memory/findings/F-2026-09-16-001.md", "wiki/systems/gitops-server.md"])
+
+    def test_status_without_words_lists_the_records_in_that_status_only(self):
+        self.assertEqual(self.paths("--status", "fixed"), ["memory/findings/F-2026-09-16-001.md"])
+
+    def test_type_still_drops_a_page(self):
+        self.assertEqual(self.paths("gitops", "--status", "fixed", "--type", "finding"),
+                         ["memory/findings/F-2026-09-16-001.md"])
+
+
 class RankedSearchTest(SearchSandbox):
     @unittest.skipUnless(search.fts_available(), "this SQLite has no FTS5: the order falls back to terms held")
     def test_best_match_first_not_path_order(self):

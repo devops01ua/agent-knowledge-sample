@@ -20,7 +20,8 @@ an editor here, and these are the house rules. `CLAUDE.md` is a symlink to this 
 ## Before you answer a question about our systems
 
 1. `acme-kb sync`, then `acme-kb search <two or three words>`, with `--in-repo <repo>` when
-   the question is about one repository (pages that name no repo, like wiki pages, stay).
+   the question is about one repository (pages that name no repo, like wiki pages, stay;
+   `--status` with words keeps them the same way, `--type` lists that type only).
    Results are ranked and ten lines long (`--limit N`, 0 for all). Lines after
    `-- not every term matched --` hold only some of the words: nearby, not a match.
    Without words, search lists every record the filters pass.

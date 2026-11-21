@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Article 3 figures</title>
+<style>
+:root{--ink:#0f1726;--mute:#5b6576;--line:#c8cfda;--blue:#1d5bd6;--bluebg:#e6eefc;--green:#11804a;--greenbg:#e3f4ea;--amber:#c05a00;--amberbg:#fdf0e1;--red:#c62828;--bg:#fbfcfe}
+*{box-sizing:border-box}
+body{margin:0;background:#d9dee6;font:16px/1.35 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+.fig{position:relative;width:1200px;height:630px;background:var(--bg);margin:0 auto 24px;overflow:hidden}
+.fig h2{position:absolute;left:40px;top:26px;margin:0;font-size:28px;letter-spacing:-.01em}
+.fig .sub{position:absolute;left:40px;top:68px;font-size:17px;color:var(--mute);max-width:1120px}
+.n{position:absolute;border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:10px 12px;display:flex;gap:10px;align-items:center}
+.n img{width:38px;height:38px;flex:none}
+.n b{display:block;font:600 15px ui-monospace,Menlo,monospace}
+.n span{display:block;font-size:13px;color:var(--mute)}
+.n.hi{border-color:var(--blue);background:var(--bluebg)}
+.n.ok{border-color:var(--green);background:var(--greenbg)}
+.n.warn{border-color:var(--amber);background:var(--amberbg)}
+.grp{position:absolute;border:1.5px dashed var(--line);border-radius:12px}
+.grp .gl{position:absolute;left:10px;top:-11px;background:var(--bg);padding:0 6px;font-size:13px;color:var(--mute);display:flex;gap:6px;align-items:center}
+.grp .gl img{width:18px;height:18px}
+svg.edges{position:absolute;left:0;top:0;width:1200px;height:630px;pointer-events:none}
+.lbl{position:absolute;font-size:12.5px;color:var(--mute);background:var(--bg);padding:0 4px}
+.note{position:absolute;left:40px;right:40px;bottom:22px;font-size:15px;color:var(--mute);border-top:1px solid var(--line);padding-top:10px}
+.note b{color:var(--ink)}
+pre{margin:0;font:13px/1.45 ui-monospace,Menlo,monospace;white-space:pre}
+.code{position:absolute;background:#0f1726;color:#dfe6f2;border-radius:10px;padding:14px 16px}
+.code .h{color:#8fb4ff}.code .g{color:#8fd6a8}.code .m{color:#7d8798}
+.code .t{position:absolute;top:-26px;left:0;font:600 14px -apple-system,sans-serif;color:var(--ink)}
+table.bars{position:absolute;border-collapse:collapse;font-size:14px}
+table.bars td{padding:5px 8px;vertical-align:middle}
+.bar{height:18px;border-radius:4px;background:#9db6e8;display:inline-block;vertical-align:middle}
+.bar.best{background:var(--green)}.bar.bad{background:var(--red)}
+.col{position:absolute;width:330px}
+.col h3{margin:0 0 8px;font-size:15px;color:var(--mute);font-weight:600}
+.item{border-radius:8px;padding:8px 10px;margin-bottom:7px;font:13.5px ui-monospace,Menlo,monospace;display:flex;justify-content:space-between;background:#eef1f6}
+.item i{font:12px -apple-system,sans-serif;color:var(--mute);font-style:normal}
+.item.full{background:var(--greenbg)}.item.kb{background:var(--bluebg)}
+.formula{position:absolute;font:14px ui-monospace,Menlo,monospace;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px}
+</style></head><body>
+<script src="icons.js"></script>
+<div id="root"></div>
+<script>
+const W=1200,H=630;
+function fig(id,title,sub,h){const d=document.createElement('div');d.className='fig';d.id=id;if(h)d.style.height=h+'px';d.innerHTML=`<h2>${title}</h2>`+(sub?`<div class="sub">${sub}</div>`:'')+`<svg class="edges"><defs><marker id="a${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#9aa4b4"/></marker><marker id="b${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#1d5bd6"/></marker></defs></svg>`;document.getElementById('root').appendChild(d);d.N={};return d}
+function node(f,k,x,y,w,h,title,sub,cls,icon){const e=document.createElement('div');e.className='n '+(cls||'');Object.assign(e.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});e.innerHTML=(icon&&ICONS[icon]?`<img src="${ICONS[icon]}">`:'')+`<div><b>${title}</b>${sub?`<span>${sub}</span>`:''}</div>`;f.appendChild(e);f.N[k]=[x,y,w,h]}
+function grp(f,x,y,w,h,label,icon,color){const e=document.createElement('div');e.className='grp';Object.assign(e.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px',borderColor:color||'#c8cfda',borderStyle:color?'solid':'dashed'});e.innerHTML=`<div class="gl">${icon&&ICONS[icon]?`<img src="${ICONS[icon]}">`:''}${label}</div>`;f.appendChild(e)}
+function edge(f,a,b,opt={}){const [ax,ay,aw,ah]=f.N[a],[bx,by,bw,bh]=f.N[b];let x1,y1,x2,y2,d;
+ const v=opt.v;
+ if(v){x1=ax+aw/2+(opt.dx1||0);x2=bx+bw/2+(opt.dx2||0);if(by>ay){y1=ay+ah;y2=by}else{y1=ay;y2=by+bh}const m=(y1+y2)/2;d=`M${x1},${y1} C${x1},${m} ${x2},${m} ${x2},${y2}`}
+ else{if(bx>ax){x1=ax+aw;x2=bx}else{x1=ax;x2=bx+bw}y1=ay+ah/2+(opt.dy1||0);y2=by+bh/2+(opt.dy2||0);const m=(x1+x2)/2;d=`M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`}
+ const s=f.querySelector('svg');const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke',opt.hi?'#1d5bd6':'#9aa4b4');p.setAttribute('stroke-width',opt.hi?2.5:1.6);if(opt.dash)p.setAttribute('stroke-dasharray','5 4');p.setAttribute('marker-end',`url(#${opt.hi?'b':'a'}${f.id})`);s.appendChild(p);
+ if(opt.label){const l=document.createElement('div');l.className='lbl';l.textContent=opt.label;l.style.left=((x1+x2)/2-40+(opt.lx||0))+'px';l.style.top=((y1+y2)/2-10+(opt.ly||0))+'px';f.appendChild(l)}}
+function html(f,s){const e=document.createElement('div');e.innerHTML=s;while(e.firstChild)f.appendChild(e.firstChild)}
+
+/* f1 - the map */
+let f=fig('f1','One repo, one door, every call visible','Git stays the source of truth. Agents read through one read-only server instead of opening files.');
+grp(f,320,140,840,400,'AWS account','g_account','#E7157B');
+grp(f,340,165,270,355,'Kubernetes cluster','eks');
+node(f,'lap',40,170,230,74,'coding agents','four tools on laptops','', 'client');
+node(f,'ops',40,330,230,74,'hosted ops agent','investigates alerts','', 'devopsagent');
+node(f,'mcp',360,200,230,100,'kb-mcp','search · get · list · related<br>reads a clone of main, pulled every 5 min','hi','eks');
+node(f,'tel',360,420,230,74,'telemetry','metrics · logs · traces','ok','cwlogs');
+node(f,'kb',650,200,230,74,'managed KB','embeddings, top 20','', 'bedrock');
+node(f,'vec',650,330,230,62,'vector index','one vector per document','', 's3vectors');
+node(f,'docs',910,330,230,62,'docs bucket','pages as KB documents','', 's3');
+node(f,'git',910,30,230,64,'knowledge repo','main, after review','', 'git');
+edge(f,'lap','mcp',{hi:1,label:'MCP',lx:10});edge(f,'ops','mcp',{hi:1,dy2:20});
+edge(f,'mcp','kb',{label:'meaning',lx:5,ly:-14,dy1:-12});
+edge(f,'kb','vec',{v:1});edge(f,'docs','vec');
+edge(f,'mcp','tel',{v:1});
+edge(f,'git','docs',{v:1,dash:1,label:'CI export on merge',lx:70,ly:-30});
+html(f,`<div class="note">Writes do not go through the server: a new finding is still a branch and a merge request. Laptops keep the CLI as a fallback, CI uses a clone.</div>`);
+
+/* f2 - context bill */
+f=fig('f2','What the agent pulled into its context','Same 20 questions, same small model, same corpus. Only the way the agent reads the knowledge changes.',380);
+const rows=[['old CLI, whole files',12.1,190,135,7,''],['CLI with get and list',10.1,131,121,5.5,'best'],['MCP, indented JSON',16.2,140,128,6,'bad'],['MCP, compact text',10.1,135,116,6,'best']];
+let t='<table class="bars" style="left:40px;top:130px;width:1120px"><tr style="color:#5b6576"><td>mode</td><td>correct</td><td>tool output per question</td><td>input tokens per question</td><td>cost, 20 questions</td></tr>';
+for(const r of rows){t+=`<tr><td style="font:600 14px ui-monospace,Menlo,monospace;width:250px">${r[0]}</td><td style="color:#11804a;width:80px">20/20</td><td style="width:300px"><span class="bar ${r[5]}" style="width:${r[1]*14}px"></span> ${r[1]} KB</td><td style="width:300px"><span class="bar ${r[5]=='bad'?'':r[5]}" style="width:${r[2]*1.2}px"></span> ${r[2]}k</td><td>$0.${r[3]}</td></tr>`}
+html(f,t+'</table>');
+html(f,`<div class="note"><b>The JSON version made it worse:</b> +34% tool output, because it returned fields nobody asked for. The same answers as plain lines: <b>-29% input tokens and -14% cost</b> against the old CLI.</div>`);
+
+/* f3 - json vs text */
+f=fig('f3','Same answer, two shapes','One entry asked by id. The agent needs the status, the summary and the fix.');
+html(f,`<div class="code" style="left:40px;top:150px;width:540px;height:370px"><div class="t">JSON (first version)</div><pre>{
+ <span class="h">"schema_version"</span>: 1,
+ <span class="h">"path"</span>: "memory/findings/F-2026-09-14-001.md",
+ <span class="h">"kind"</span>: "finding",
+ <span class="h">"fields"</span>: {
+  <span class="h">"id"</span>: "F-2026-09-14-001",
+  <span class="h">"status"</span>: "open",
+  <span class="h">"confidence"</span>: "verified",
+  <span class="h">"summary"</span>: "Node root disk fills after deploys",
+  <span class="h">"fix"</span>: "80Gi root volume"
+ },
+ <span class="h">"missing"</span>: [],
+ <span class="h">"sections"</span>: [],
+ <span class="h">"outline"</span>: [],
+ <span class="h">"via"</span>: null
+}</pre></div>
+<div class="code" style="left:620px;top:150px;width:540px;height:190px"><div class="t">plain lines (now)</div><pre><span class="g">memory/findings/F-2026-09-14-001.md</span>
+id: F-2026-09-14-001
+status: open
+confidence: verified
+summary: Node root disk fills after deploys
+fix: 80Gi root volume</pre></div>
+<div class="formula" style="left:620px;top:370px;width:540px">Quotes, braces, indents and empty fields are tokens too.<br>A model reads lines of <code>key: value</code> as well as JSON.<br>Scripts still get JSON with <code>--json</code> on the CLI.</div>`);
+
+/* f4 - search */
+f=fig('f4','Two searches, one list','Question: "pods lose network after namespace isolation". Pages with every word stay on top; the rest is a vote.');
+html(f,`<div class="col" style="left:40px;top:120px"><h3>by words (BM25)</h3>
+<div class="item full">F-…-31-001 isolation guard <i>every word</i></div>
+<div class="item">I-…-30-001 incident <i>some words</i></div>
+<div class="item">F-…-01-002 metadata netpol <i>some words</i></div></div>
+<div class="col" style="left:435px;top:120px"><h3>by meaning (embeddings)</h3>
+<div class="item kb">I-…-30-001 incident <i>#1</i></div>
+<div class="item kb">D-…-30-001 decision <i>#2</i></div>
+<div class="item kb">wiki: policy engine <i>#3</i></div></div>
+<div class="col" style="left:830px;top:120px"><h3>merged</h3>
+<div class="item full">F-…-31-001 isolation guard <i>every word</i></div>
+<div class="item kb">I-…-30-001 incident <i>both lists</i></div>
+<div class="item">D-…-30-001 decision <i>meaning</i></div>
+<div class="item">F-…-01-002 metadata netpol <i>words</i></div>
+<div class="item">wiki: policy engine <i>meaning</i></div></div>
+<div class="formula" style="left:40px;top:360px;width:520px"><b>1.</b> pages holding every word: first, by BM25<br>&nbsp;&nbsp;&nbsp;a word in path, id, summary, tags weighs ×5</div>
+<div class="formula" style="left:40px;top:440px;width:520px"><b>2.</b> the rest: score = 1/(60+place by words)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.5/(60+place by meaning)</div>
+<div class="formula" style="left:600px;top:360px;width:560px;height:136px">Why the meaning vote weighs half: at 1.0 a page weak in both lists jumped over a strong keyword match the meaning search missed. At 0.5 no query of the eval got worse than words alone.</div>`);
+html(f,`<div class="note">Exact error strings and alert names: words win. "The thing is called differently on the page": meaning wins. Agreement between the two decides the rest.</div>`);
+
+/* f5 - KB pipeline */
+f=fig('f5','How pages get into the meaning search','No servers to run: a CI job exports, the managed KB embeds, the vector bucket stores.');
+grp(f,420,130,740,390,'AWS account','g_account','#E7157B');
+node(f,'merge',40,170,220,74,'merge to main','a new finding','', 'git');
+node(f,'job',40,330,220,90,'CI export job','entry → whole doc + digest + metadata','', 'source');
+node(f,'q',450,170,200,74,'Retrieve','a question','hi','bedrock');
+node(f,'emb',700,170,200,74,'embedding model','text → 1024 numbers','', 'bedrock');
+node(f,'idx',950,170,190,74,'vector index','nearest 20','', 's3vectors');
+node(f,'bucket',450,340,200,74,'docs bucket','changed files only','', 's3');
+node(f,'ing',700,340,200,74,'KB ingestion','no chunking','', 'bedrock');
+edge(f,'merge','job',{v:1});edge(f,'job','bucket',{label:'upload, MD5 diff',ly:-16,lx:10});edge(f,'bucket','ing');
+edge(f,'ing','emb',{v:1});edge(f,'ing','idx',{label:'store',lx:20,ly:10});
+edge(f,'q','emb',{hi:1});edge(f,'emb','idx',{hi:1});
+html(f,`<div class="note">The metadata keeps the repo path, type, status and systems. An answer from the KB is turned back into a path in git, so the agent always reads the reviewed file, not a copy.</div>`);
+
+/* f6 - related */
+f=fig('f6','What one record connects to, in one call','kb_related on an old decision: is it still current, what cites it, what else is open on the same system.');
+node(f,'me',470,265,260,84,'D-…-16-011','decision · superseded','warn');
+node(f,'cur',890,150,250,74,'D-…-20-001','current one · open','ok');
+node(f,'sys',890,300,250,74,'system page','+ 7 other open records','');
+node(f,'link',60,150,250,74,'links to','pages named in the text','');
+node(f,'cite',60,300,250,74,'cited by','4 pages and records','hi');
+node(f,'chain',60,440,250,74,'replaces','older records it replaced','');
+edge(f,'me','cur',{label:'superseded_by',lx:0,ly:-14});edge(f,'me','sys',{label:'systems',ly:10});
+edge(f,'me','link',{dy1:-20});edge(f,'cite','me',{hi:1});edge(f,'me','chain',{dy1:20});
+html(f,`<div class="note">Each related page comes as one line with id, status and summary, and appears once. Backlinks ("who cites this") were not visible over MCP before: nothing computed them.</div>`);
+
+/* f7 - related eval */
+f=fig('f7','Following links: before and after','12 questions whose answer depends on links. Ground truth computed from the repo. 24 runs per mode.',360);
+const rr=[['clone + MCP, before',0.96,4.5,149,''],['clone + MCP + related',1.00,2.5,111,'best'],['MCP only, before',0.85,6.5,144,'bad'],['MCP only + related',1.00,2.2,94,'best']];
+t='<table class="bars" style="left:40px;top:140px;width:1120px"><tr style="color:#5b6576"><td>mode</td><td>found the expected pages</td><td>tool calls per question</td><td>input tokens per question</td></tr>';
+for(const r of rr){t+=`<tr><td style="font:600 14px ui-monospace,Menlo,monospace;width:260px">${r[0]}</td><td style="width:280px"><span class="bar ${r[4]}" style="width:${r[1]*200}px"></span> ${r[1].toFixed(2)}</td><td style="width:260px"><span class="bar ${r[4]}" style="width:${r[2]*28}px"></span> ${r[2]}</td><td><span class="bar ${r[4]}" style="width:${r[3]*1.4}px"></span> ${r[3]}k</td></tr>`}
+html(f,t+'</table>');
+html(f,`<div class="note"><b>"Who cites this page", MCP only:</b> 11.5 calls and 39 KB of tool output before (one read per candidate page), 1 call and 4 KB after.</div>`);
+
+/* f8 - eval harness */
+f=fig('f8','How we measure an agent, not just a search','The same question, the same model, a fixed copy of the repo. Only the tools change between modes.');
+node(f,'qs',40,180,220,74,'questions','with expected pages','');
+node(f,'agent',320,180,240,74,'headless agent','small model, max 25 turns','hi','client');
+node(f,'srv',320,360,240,74,'local kb-mcp','old code or new code','', 'eks');
+node(f,'log',620,180,240,74,'event stream','every tool call and result','');
+node(f,'m',920,120,240,190,'per question','found expected pages · tool calls · bytes of tool output · input tokens · cost','ok');
+edge(f,'qs','agent');edge(f,'agent','srv',{v:1});edge(f,'agent','log');edge(f,'log','m');
+html(f,`<div class="formula" style="left:620px;top:360px;width:540px">Traps we hit: an installed skill leaked into the "no skill" mode; MCP tools listed by name only made the agent grep the clone. Both fixed before any number was kept.</div>`);
+html(f,`<div class="note">Ground truth comes from outside the tool under test: labels made by reading pages, or the link graph computed straight from the files.</div>`);
+
+const only=new URLSearchParams(location.search).get('f');
+if(only){for(const d of document.querySelectorAll('.fig'))if(d.id!==only)d.remove();document.body.style.background='#fbfcfe'}
+</script></body></html>

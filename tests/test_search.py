@@ -171,7 +171,7 @@ class SearchJsonTest(SearchSandbox):
         doc = self.json("token", "rollout")
         self.assertEqual(doc["schema_version"], 1)
         self.assertEqual(doc["query"]["terms"], ["token", "rollout"])
-        self.assertEqual(doc["total"], {"full": 1, "partial": 2})
+        self.assertEqual(doc["total"], {"full": 1, "partial": 3})
         by_path = {r["path"]: r for r in doc["results"]}
         f = by_path["memory/findings/F-2026-09-16-001.md"]
         self.assertEqual((f["kind"], f["id"], f["status"], f["confidence"], f["match"]),
@@ -271,7 +271,8 @@ class IndexTest(Sandbox):
     def test_map_has_one_line_per_system_with_open_counts(self):
         text = cli.build_index_map(self.root)
         self.assertIn("- gitops-server · [page](wiki/systems/gitops-server.md) · open 0 of 2 · The GitOps server", text)
-        self.assertIn("- agent-tooling · no page · open 1 of 1", text)  # named by a record, no page yet
+        self.assertIn("- agent-tooling · [page](wiki/systems/agent-tooling.md) · open 2 of 2", text)
+        self.assertIn("- payments · no page · open 0 of 1", text)  # named by a record, no page yet
         self.assertIn("- payments · no page · open 0 of 1", text)
         self.assertNotIn("F-2026-09-16-001", text)  # records are counted, not listed
 

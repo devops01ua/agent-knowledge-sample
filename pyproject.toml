@@ -1,6 +1,6 @@
 [project]
 name = "acme-kb"
-version = "0.1.0"
+version = "0.3.0"
 description = "CLI for a markdown knowledge repo shared by a team's coding agents"
 requires-python = ">=3.11"
 dependencies = []

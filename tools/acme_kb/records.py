@@ -106,8 +106,11 @@ def check(root, today=None):
     errors, warnings = [], []
     targets = link_targets(root)
     seen_ids = {}
+    every_id = {r.meta.get("id") for r in load(root)}
     for rec in load(root):
         rel = rec.path.relative_to(root)
+        if rec.meta.get("superseded_by") and rec.meta["superseded_by"] not in every_id:
+            errors.append(f"{rel}: superseded_by {rec.meta['superseded_by']} is not a record here")
         err = lambda msg: errors.append(f"{rel}: {msg}")
         spec = KINDS.get(rec.kind)
         if not rec.meta:
@@ -154,6 +157,10 @@ def check(root, today=None):
         for target in LINK.findall(rec.body):
             if target.strip() not in targets:
                 err(f"dead link [[{target.strip()}]]")
+        if rec.meta.get("status") == "superseded" and not rec.meta.get("superseded_by"):
+            err("status superseded needs superseded_by: the id that replaced it")
+        if rec.meta.get("superseded_by") and not ID.match(str(rec.meta["superseded_by"])):
+            err("superseded_by must be a record id")
         if rec.meta.get("status") == "open" and "expires" in dates and dates["expires"] < today:
             warnings.append(f"{rel}: open and expired on {dates['expires']}; fix it, renew it or close it")
     return errors, warnings

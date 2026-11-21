@@ -66,7 +66,7 @@ class SchemaTest(Sandbox):
     def test_expired_open_record_is_a_warning(self):
         errors, warnings = records.check(self.root, today=dt.date(2027, 6, 1))
         self.assertEqual(errors, [])
-        self.assertEqual(len(warnings), 1)  # the open finding; the fixed one is not reported
+        self.assertEqual(len(warnings), 2)  # the two open findings; the fixed one is not reported
         self.assertIn("F-2026-09-20-001", warnings[0])
 
 
@@ -116,7 +116,7 @@ class CliTest(Sandbox):
 
     def test_gen_index_and_init_repo(self):
         _, out = run("--repo", str(self.root), "gen-index")
-        self.assertIn("index-full.md: 5 records", out)
+        self.assertIn("index-full.md: 8 records", out)
         self.assertIn("F-2026-09-16-001", (self.root / "index-full.md").read_text())
         target = self.root.parent / "some-code-repo"
         target.mkdir()

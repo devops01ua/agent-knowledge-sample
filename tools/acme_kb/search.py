@@ -75,9 +75,10 @@ def scores(docs, low):
         return dict(con.execute(f"select rowid, bm25(t, {HEAD_WEIGHT}, 1.0) from t where t match ?", (query,)))
 
 
-def ranked(root, terms, type=None, status=None, in_repo=None):
+def ranked(root, terms, type=None, status=None, in_repo=None, meaning=None):
     """(records holding every term, records holding some), each best first.
-    Without terms: every record the filters pass, in path order, and no partial group."""
+    Without terms: every record the filters pass, in path order, and no partial group.
+    `meaning` (query text -> repo paths, best first) adds a ranking by meaning, see `fuse`."""
     low = [t.lower() for t in terms]
     docs = select(root, low, type=type, status=status, in_repo=in_repo)
     if not low:
@@ -90,7 +91,10 @@ def ranked(root, terms, type=None, status=None, in_repo=None):
             continue
         key = (bm25.get(i, 0.0) if bm25 is not None else -held, d["rel"])
         (full if held == len(low) else partial).append((key, i))
-    return [docs[i] for _, i in sorted(full)], [docs[i] for _, i in sorted(partial)]
+    full, partial = [docs[i] for _, i in sorted(full)], [docs[i] for _, i in sorted(partial)]
+    if meaning:
+        return fuse(docs, full, partial, meaning(" ".join(terms)))
+    return full, partial
 
 
 def line(d):
@@ -135,3 +139,23 @@ def to_json(full, partial, limit, query):
                        "total": {"full": len(full), "partial": len(partial)},
                        "results": [record(d, "full") for d in top] + [record(d, "partial") for d in rest]},
                       ensure_ascii=False, indent=1)
+
+
+
+RRF_K = 60  # the usual constant: places 1 and 2 differ little, so agreement between lists decides
+MEANING_WEIGHT = 0.5  # at 1.0 a page weak in both lists overtook a strong keyword match the meaning search missed
+
+
+def fuse(docs, full, partial, meaning_paths, weight=MEANING_WEIGHT):
+    """Records holding every term stay first and in their order. The rest - partial keyword
+    matches and what the meaning search found among the records the filters pass - is ranked by
+    weighted reciprocal rank: 1/(RRF_K + place by words) + weight/(RRF_K + place by meaning)."""
+    at = {d["rel"]: d for d in docs}
+    whole = {d["rel"] for d in full}
+    score = {}
+    for place, d in enumerate(partial, 1):
+        score[d["rel"]] = score.get(d["rel"], 0.0) + 1.0 / (RRF_K + place)
+    meant = [r for r in meaning_paths if r in at and r not in whole]
+    for place, rel in enumerate(meant, 1):
+        score[rel] = score.get(rel, 0.0) + weight / (RRF_K + place)
+    return full, [at[r] for r in sorted(score, key=lambda r: (-score[r], r))]

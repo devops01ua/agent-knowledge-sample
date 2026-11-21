@@ -10,3 +10,4 @@ dist/
 /index-full.md
 # the personal search log of acme-kb search, read by acme-kb queries
 /.queries/
+eval/runs/

@@ -26,7 +26,11 @@ an editor here, and these are the house rules. `CLAUDE.md` is a symlink to this 
    `-- not every term matched --` hold only some of the words: nearby, not a match.
    Without words, search lists every record the filters pass.
 2. Search found nothing useful: open `index.md`, pick the system, `acme-kb search <system>`.
-3. Read two or three records, not more.
+3. Read two or three records, not more, and in part: `acme-kb get <id | path | system>` gives a
+   record's working fields or a page's outline (`--section <heading>` for one section);
+   `acme-kb related <ref>` gives the supersede chain, links, who cites it and the other open
+   records on the same systems, one line each. The MCP server in `mcp/` serves the same four
+   functions as `kb_search`, `kb_get`, `kb_list`, `kb_related`.
 4. Take exact values (versions, flags, limits) from `raw/`, not from a summary.
 5. End the answer with a footer:
    `source: <id> (<confidence>) · <wiki page> (<updated>) · owner: <owner>`
@@ -61,7 +65,9 @@ an editor here, and these are the house rules. `CLAUDE.md` is a symlink to this 
 ## Changing a record
 
 Status changes (`open` to `fixed`, `accepted` to `superseded`) go the same way a record
-was born: an edit, `updated` set to today, a pull request, one reviewer.
+was born: an edit, `updated` set to today, a pull request, one reviewer. A superseded record
+names its replacement in `superseded_by: <id>` and stays: it is the history of the choice.
+The gate checks that the id exists.
 
 ## The gate
 

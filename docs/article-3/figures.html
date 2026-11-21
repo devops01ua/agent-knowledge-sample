@@ -54,14 +54,14 @@ function html(f,s){const e=document.createElement('div');e.innerHTML=s;while(e.f
 /* f1 - the map */
 let f=fig('f1','One repo, one door, every call visible','Git stays the source of truth. Agents read through one read-only server instead of opening files.');
 grp(f,320,140,840,400,'AWS account','g_account','#E7157B');
-grp(f,340,165,270,355,'Kubernetes cluster','eks');
+grp(f,340,165,270,355,'EKS cluster','eks');
 node(f,'lap',40,170,230,74,'coding agents','four tools on laptops','', 'client');
 node(f,'ops',40,330,230,74,'hosted ops agent','investigates alerts','', 'devopsagent');
 node(f,'mcp',360,200,230,100,'kb-mcp','search · get · list · related<br>reads a clone of main, pulled every 5 min','hi','eks');
 node(f,'tel',360,420,230,74,'telemetry','metrics · logs · traces','ok','cwlogs');
-node(f,'kb',650,200,230,74,'managed KB','embeddings, top 20','', 'bedrock');
-node(f,'vec',650,330,230,62,'vector index','one vector per document','', 's3vectors');
-node(f,'docs',910,330,230,62,'docs bucket','pages as KB documents','', 's3');
+node(f,'kb',650,200,230,74,'Bedrock KB','Titan embeddings, top 20','', 'bedrock');
+node(f,'vec',650,330,230,62,'S3 Vectors','one vector per document','', 's3vectors');
+node(f,'docs',910,330,230,62,'S3 bucket','pages as KB documents','', 's3');
 node(f,'git',910,30,230,64,'knowledge repo','main, after review','', 'git');
 edge(f,'lap','mcp',{hi:1,label:'MCP',lx:10});edge(f,'ops','mcp',{hi:1,dy2:20});
 edge(f,'mcp','kb',{label:'meaning',lx:5,ly:-14,dy1:-12});
@@ -110,7 +110,7 @@ html(f,`<div class="col" style="left:40px;top:120px"><h3>by words (BM25)</h3>
 <div class="item full">F-…-31-001 isolation guard <i>every word</i></div>
 <div class="item">I-…-30-001 incident <i>some words</i></div>
 <div class="item">F-…-01-002 metadata netpol <i>some words</i></div></div>
-<div class="col" style="left:435px;top:120px"><h3>by meaning (embeddings)</h3>
+<div class="col" style="left:435px;top:120px"><h3>by meaning (Bedrock KB)</h3>
 <div class="item kb">I-…-30-001 incident <i>#1</i></div>
 <div class="item kb">D-…-30-001 decision <i>#2</i></div>
 <div class="item kb">wiki: policy engine <i>#3</i></div></div>
@@ -126,15 +126,15 @@ html(f,`<div class="col" style="left:40px;top:120px"><h3>by words (BM25)</h3>
 html(f,`<div class="note">Exact error strings and alert names: words win. "The thing is called differently on the page": meaning wins. Agreement between the two decides the rest.</div>`);
 
 /* f5 - KB pipeline */
-f=fig('f5','How pages get into the meaning search','No servers to run: a CI job exports, the managed KB embeds, the vector bucket stores.');
+f=fig('f5','How pages get into the meaning search','No servers to run: a CI job exports, Bedrock embeds with Titan, S3 Vectors stores.');
 grp(f,420,130,740,390,'AWS account','g_account','#E7157B');
 node(f,'merge',40,170,220,74,'merge to main','a new finding','', 'git');
 node(f,'job',40,330,220,90,'CI export job','entry → whole doc + digest + metadata','', 'source');
-node(f,'q',450,170,200,74,'Retrieve','a question','hi','bedrock');
-node(f,'emb',700,170,200,74,'embedding model','text → 1024 numbers','', 'bedrock');
-node(f,'idx',950,170,190,74,'vector index','nearest 20','', 's3vectors');
-node(f,'bucket',450,340,200,74,'docs bucket','changed files only','', 's3');
-node(f,'ing',700,340,200,74,'KB ingestion','no chunking','', 'bedrock');
+node(f,'q',450,170,200,74,'Bedrock Retrieve','a question','hi','bedrock');
+node(f,'emb',700,170,200,74,'Titan Text V2','text → 1024 numbers','', 'bedrock');
+node(f,'idx',950,170,190,74,'S3 Vectors','nearest 20','', 's3vectors');
+node(f,'bucket',450,340,200,74,'S3 bucket','changed files only','', 's3');
+node(f,'ing',700,340,200,74,'KB ingestion job','no chunking','', 'bedrock');
 edge(f,'merge','job',{v:1});edge(f,'job','bucket',{label:'upload, MD5 diff',ly:-16,lx:10});edge(f,'bucket','ing');
 edge(f,'ing','emb',{v:1});edge(f,'ing','idx',{label:'store',lx:20,ly:10});
 edge(f,'q','emb',{hi:1});edge(f,'emb','idx',{hi:1});

@@ -52,7 +52,7 @@ function edge(f,a,b,opt={}){const [ax,ay,aw,ah]=f.N[a],[bx,by,bw,bh]=f.N[b];let 
 function html(f,s){const e=document.createElement('div');e.innerHTML=s;while(e.firstChild)f.appendChild(e.firstChild)}
 
 /* f1 - the map */
-let f=fig('f1','One repo, one door, every call visible','Git stays the source of truth. Agents read through one read-only server instead of opening files.');
+let f=fig('f1','One repo, one server, every call visible','Git stays the source of truth. Agents read through one read-only server instead of opening files.');
 grp(f,320,140,840,400,'AWS account','g_account','#E7157B');
 grp(f,340,165,270,355,'EKS cluster','eks');
 node(f,'lap',40,170,230,74,'coding agents','four tools on laptops','', 'client');

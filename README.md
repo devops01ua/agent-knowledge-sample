@@ -5,7 +5,7 @@ pull requests, no database and no SaaS. What one engineer's agent found today, e
 engineer's agent can read tomorrow morning.
 
 It is the companion repo of three articles: "The Chronicle of the Tower" (tag `article-1`),
-"The Chronicle Learns to Search" (`article-2`) and "The Knowledge Repo Gets a Front Door"
+"The Chronicle Learns to Search" (`article-2`) and "The Chronicle Gets a Librarian"
 (`article-3`: `get`, `list`, `related`, ranking by meaning, an MCP server and the eval). It is the second half of
 [agent-plugins-sample](https://github.com/devops01ua/agent-plugins-sample), which holds
 the tools the agents work with. Everything here is a sample: the systems, names and
